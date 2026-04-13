@@ -45,13 +45,13 @@ This shows an overview with stats, recent projects, and assigned tasks.
         <div class="card-body">
             {% if projects %}
                 <!--
-                {% for %} = Like @foreach in Blade
-                {{ project.name }} = Like {{ $project->name }}
+                [% for %] = Like @foreach in Blade
+                {{ project.name }} = Like [[ $project->name ]]
                 -->
                 {% for project in projects %}
                 <div class="list-item">
                     <a href="{% url 'project_detail' pk=project.pk %}">
-                        <!-- {% url 'name' pk=value %} = Like route('name', ['pk' => $value]) -->
+                        <!-- [% url 'name' pk=value %] = Like route('name', ['pk' => $value]) -->
                         <strong>{{ project.name }}</strong>
                     </a>
                     <span class="text-muted">{{ project.created_at|date:"M d, Y" }}</span>

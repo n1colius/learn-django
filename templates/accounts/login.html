@@ -18,8 +18,8 @@ The form variable contains username + password fields.
     <p class="auth-subtitle">Welcome back! Sign in to your account.</p>
 
     <!--
-    In Laravel: <form method="POST" action="{{ route('login') }}">
-    In Django:  <form method="post" action="{% url 'login' %}">
+    In Laravel: <form method="POST" action="[[ route('login') ]]">
+    In Django:  <form method="post" action="[% url 'login' %]">
     -->
     <form method="post" action="{% url 'login' %}">
         {% csrf_token %}
@@ -43,7 +43,7 @@ The form variable contains username + password fields.
             <input type="text" name="username" id="id_username" class="form-control"
                    placeholder="Username" required autofocus>
             {% if form.username.errors %}
-            <!-- Like @error('username') {{ $message }} @enderror -->
+            <!-- Like @error('username') [[ $message ]] @enderror -->
             <div class="field-error">{{ form.username.errors.0 }}</div>
             {% endif %}
         </div>

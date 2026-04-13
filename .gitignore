@@ -1,0 +1,17 @@
+# Virtual environment (like vendor/ in Laravel)
+venv/
+
+# Database (local dev only)
+db.sqlite3
+
+# Python cache files
+__pycache__/
+*.py[cod]
+*.pyo
+
+# IDE files
+.vscode/
+.idea/
+
+# Environment variables (like .env in Laravel)
+.env

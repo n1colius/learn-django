@@ -10,9 +10,10 @@ Every file in this project is heavily commented with Laravel equivalents so you 
 
 1. [Quick Start](#quick-start)
 2. [Project Structure](#project-structure)
-3. [Laravel vs Django - The Big Picture](#laravel-vs-django---the-big-picture)
-4. [Command Cheat Sheet](#command-cheat-sheet)
-5. [Concept-by-Concept Guide](#concept-by-concept-guide)
+3. [Order of File Execution](#order-of-file-execution)
+4. [Laravel vs Django - The Big Picture](#laravel-vs-django---the-big-picture)
+5. [Command Cheat Sheet](#command-cheat-sheet)
+6. [Concept-by-Concept Guide](#concept-by-concept-guide)
    - [Settings (config)](#1-settings--configuration)
    - [Models (Eloquent)](#2-models--database)
    - [Migrations](#3-migrations)
@@ -24,32 +25,92 @@ Every file in this project is heavily commented with Laravel equivalents so you 
    - [Admin Panel](#9-admin-panel)
    - [Static Files](#10-static-files)
    - [ORM Queries](#11-orm-queries--eloquent-equivalent)
-6. [Features Included](#features-included)
-7. [Exercises to Try](#exercises-to-try)
-8. [Common Gotchas](#common-gotchas)
-9. [Where to Go Next](#where-to-go-next)
+7. [Features Included](#features-included)
+8. [Exercises to Try](#exercises-to-try)
+9. [Common Gotchas](#common-gotchas)
+10. [Where to Go Next](#where-to-go-next)
 
 ---
 
 ## Quick Start
 
 ```bash
-# 1. Install Django (if not already installed)
+# 1. Create a virtual environment (RECOMMENDED — explanation below)
+python -m venv venv
+
+# 2. Activate the virtual environment
+#    On Windows (CMD):
+venv\Scripts\activate
+#    On Windows (PowerShell):
+venv\Scripts\Activate.ps1
+#    On Mac/Linux:
+source venv/bin/activate
+
+# You should now see (venv) at the start of your terminal prompt.
+# All pip installs will now go INTO this project's venv/ folder only.
+
+# 3. Install Django
 pip install django
 
-# 2. Run database migrations (like: php artisan migrate)
+# 4. Run database migrations (like: php artisan migrate)
 python manage.py migrate
 
-# 3. Create a superuser for the admin panel (like: php artisan make:admin)
+# 5. Create a superuser for the admin panel (like: php artisan make:admin)
 python manage.py createsuperuser
 
-# 4. Start the development server (like: php artisan serve)
+# 6. Start the development server (like: php artisan serve)
 python manage.py runserver
 
-# 5. Open your browser
+# 7. Open your browser
 #    Main app:    http://127.0.0.1:8000/
 #    Admin panel: http://127.0.0.1:8000/admin/
 ```
+
+### What is a Virtual Environment? (Laravel Developer Explanation)
+
+In **Laravel/PHP**, when you run `composer install`, packages go into a `vendor/` folder **inside your project**. Each project has its own `vendor/`. Packages never conflict between projects. You never think about this.
+
+In **Python**, `pip install django` installs Django **globally** on your system by default. So if Project A needs Django 4.2 and Project B needs Django 5.0, they would conflict!
+
+A **virtual environment** (`venv`) solves this by creating an isolated `venv/` folder inside your project — just like `vendor/` in Laravel.
+
+```
+Laravel                              Python/Django
+───────                              ─────────────
+composer install                     pip install django
+  → installs to vendor/                → installs GLOBALLY (bad!)
+
+                                     python -m venv venv
+                                     venv\Scripts\activate
+                                     pip install django
+                                       → installs to venv/ (good!)
+```
+
+| Concept | Laravel (PHP) | Django (Python) |
+|---------|---------------|-----------------|
+| Package installer | `composer` | `pip` |
+| Package file | `composer.json` | `requirements.txt` |
+| Lock file | `composer.lock` | *(use `pip freeze > requirements.txt`)* |
+| Package folder | `vendor/` (auto per-project) | `venv/` (manual, activate first) |
+| Install from file | `composer install` | `pip install -r requirements.txt` |
+
+#### Saving & Sharing Dependencies
+
+```bash
+# Save current packages to a file (like composer.lock)
+pip freeze > requirements.txt
+
+# On another machine, install all packages from that file
+pip install -r requirements.txt
+```
+
+#### Rules to Remember
+- **Always activate** the venv before working: `venv\Scripts\activate`
+- You'll see `(venv)` in your terminal when it's active
+- **Never commit** the `venv/` folder to git (add it to `.gitignore`, like `vendor/`)
+- **Always commit** `requirements.txt` to git (like `composer.json`)
+
+---
 
 ### Pre-loaded Demo Account
 
@@ -125,6 +186,76 @@ learn-django/
 | HTML template | **View** (Blade) | **Template** |
 
 This is the #1 source of confusion. In Django, what Laravel calls a "controller" is called a "view", and what Laravel calls a "view" is called a "template".
+
+---
+
+## Order of File Execution
+
+When a browser makes a request to your Django app, here is the exact order of files that run:
+
+```
+Browser Request  e.g. GET /tasks/
+        │
+        ▼
+1.  manage.py              ← Entry point — starts the development server
+        │
+        ▼
+2.  settings.py            ← Loads all config (DB, installed apps, middleware, etc.)
+        │
+        ▼
+3.  urls.py  (project)     ← Root URL router — which app should handle this URL?
+        │                     (taskmanager/urls.py)
+        ▼
+4.  urls.py  (app)         ← App-level URL router — which view handles this exact URL?
+        │                     (tasks/urls.py  or  accounts/urls.py)
+        ▼
+5.  middleware              ← Runs before the view (checks auth, session, security, etc.)
+        │
+        ▼
+6.  views.py               ← Your logic lives here (like a Laravel Controller)
+        │
+        ├── models.py      ← Queries the database (like Eloquent models)
+        │
+        ├── forms.py       ← Validates submitted data (like Laravel Form Requests)
+        │
+        ▼
+7.  template (.html)       ← Renders the final HTML to send back
+        │
+        ▼
+Browser Response
+```
+
+### Compared to Laravel
+
+| Step | Django File | Laravel Equivalent |
+|------|-------------|-------------------|
+| 1 | `manage.py` | `artisan` / `public/index.php` |
+| 2 | `settings.py` | `.env` + `config/` folder |
+| 3 | `taskmanager/urls.py` | `routes/web.php` |
+| 4 | `tasks/urls.py` | Route groups |
+| 5 | Middleware | `app/Http/Middleware/` |
+| 6 | `views.py` | `app/Http/Controllers/` |
+| 6a | `models.py` | `app/Models/` (Eloquent) |
+| 6b | `forms.py` | `app/Http/Requests/` |
+| 7 | `templates/*.html` | `resources/views/*.blade.php` |
+
+### Real Example — Login Request in This Project
+
+```
+GET /accounts/login/
+  → taskmanager/urls.py      finds "accounts/" → include accounts/urls.py
+  → accounts/urls.py         finds "login/" → Django's built-in LoginView
+  → middleware               checks session, CSRF, etc.
+  → LoginView (view)         handles GET: shows form / POST: validates login
+  → templates/accounts/login.html   renders the HTML page
+```
+
+### Key Takeaway
+
+> Django always follows this order: **URLs → Middleware → View → Template**
+>
+> You will spend most of your time in **urls.py**, **views.py**, **models.py**, and **templates/**.
+> The other files (`settings.py`, `forms.py`) are configured once and rarely touched after setup.
 
 ---
 
