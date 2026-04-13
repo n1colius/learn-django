@@ -1,0 +1,42 @@
+<!--
+=== LARAVEL COMPARISON ===
+Like resources/views/projects/create.blade.php AND edit.blade.php combined.
+Django often uses ONE template for both create and edit (based on context variables).
+-->
+
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - Task Manager{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <h1>{{ title }}</h1>
+</div>
+
+<div class="form-container">
+    <!--
+    Notice: no action="" attribute needed when posting to the same URL.
+    Like <form method="POST"> in Laravel (posts to current route).
+    -->
+    <form method="post">
+        {% csrf_token %}
+
+        {% for field in form %}
+        <div class="form-group">
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% if field.errors %}
+            <div class="field-error">{{ field.errors.0 }}</div>
+            {% endif %}
+        </div>
+        {% endfor %}
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">
+                {% if project %}Update{% else %}Create{% endif %} Project
+            </button>
+            <a href="{% url 'project_list' %}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ task.title }} - Task Manager{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <div>
+        <p class="breadcrumb">
+            <a href="{% url 'project_detail' pk=task.project.pk %}">{{ task.project.name }}</a> &raquo;
+        </p>
+        <h1>{{ task.title }}</h1>
+    </div>
+    <div class="header-actions">
+        <a href="{% url 'task_edit' pk=task.pk %}" class="btn btn-secondary">Edit</a>
+        <a href="{% url 'task_delete' pk=task.pk %}" class="btn btn-danger">Delete</a>
+    </div>
+</div>
+
+<!-- Task Info Card -->
+<div class="card">
+    <div class="card-body">
+        <div class="task-info-grid">
+            <div class="info-item">
+                <label>Status</label>
+                <span class="badge badge-status-{{ task.status }}">{{ task.get_status_display }}</span>
+            </div>
+            <div class="info-item">
+                <label>Priority</label>
+                <span class="badge badge-{{ task.priority }}">{{ task.get_priority_display }}</span>
+            </div>
+            <div class="info-item">
+                <label>Assigned To</label>
+                <span>{{ task.assigned_to.username|default:"Unassigned" }}</span>
+                <!-- |default:"text" = Like $value ?? 'text' in PHP -->
+            </div>
+            <div class="info-item">
+                <label>Due Date</label>
+                <span class="{% if task.is_overdue %}text-danger{% endif %}">
+                    {{ task.due_date|date:"M d, Y"|default:"No due date" }}
+                </span>
+            </div>
+            <div class="info-item">
+                <label>Created</label>
+                <span>{{ task.created_at|date:"M d, Y H:i" }}</span>
+            </div>
+        </div>
+
+        {% if task.description %}
+        <div class="task-description">
+            <h3>Description</h3>
+            <!-- |linebreaks converts newlines to <p> tags — like nl2br() in PHP -->
+            {{ task.description|linebreaks }}
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Quick Status Update -->
+<div class="card">
+    <div class="card-header">
+        <h2>Quick Status Update</h2>
+    </div>
+    <div class="card-body">
+        <div class="status-buttons">
+            {% for value, label in task.STATUS_CHOICES %}
+            <form method="post" action="{% url 'task_update_status' pk=task.pk %}" class="inline-form">
+                {% csrf_token %}
+                <input type="hidden" name="status" value="{{ value }}">
+                <button type="submit"
+                        class="btn btn-small {% if task.status == value %}btn-active{% endif %}">
+                    {{ label }}
+                </button>
+            </form>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Comments Section -->
+<div class="card">
+    <div class="card-header">
+        <h2>Comments ({{ comments|length }})</h2>
+        <!-- |length = Like count($array) in PHP -->
+    </div>
+    <div class="card-body">
+        {% if comments %}
+            {% for comment in comments %}
+            <div class="comment">
+                <div class="comment-header">
+                    <strong>{{ comment.author.username }}</strong>
+                    <span class="text-muted">{{ comment.created_at|timesince }} ago</span>
+                </div>
+                <div class="comment-body">
+                    {{ comment.content|linebreaks }}
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p class="empty-state">No comments yet.</p>
+        {% endif %}
+
+        <!-- Add Comment Form -->
+        <div class="comment-form">
+            <h3>Add Comment</h3>
+            <form method="post">
+                {% csrf_token %}
+                {{ comment_form.content }}
+                <button type="submit" class="btn btn-primary" style="margin-top: 10px;">Post Comment</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

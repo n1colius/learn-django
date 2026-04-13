@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block title %}Search - Task Manager{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <h1>Search</h1>
+</div>
+
+<div class="search-container">
+    <form method="get" action="{% url 'search' %}">
+        <!-- GET form — like Laravel's search with query string: /search?q=keyword -->
+        <div class="search-bar">
+            <input type="text" name="q" value="{{ query }}" class="form-control"
+                   placeholder="Search tasks and projects..." autofocus>
+            <button type="submit" class="btn btn-primary">Search</button>
+        </div>
+    </form>
+</div>
+
+{% if query %}
+<div class="search-results">
+    <!-- Project Results -->
+    <h2>Projects ({{ projects|length }})</h2>
+    {% if projects %}
+        {% for project in projects %}
+        <div class="list-item">
+            <a href="{% url 'project_detail' pk=project.pk %}">
+                <strong>{{ project.name }}</strong>
+            </a>
+            <p class="text-muted">{{ project.description|truncatewords:20 }}</p>
+        </div>
+        {% endfor %}
+    {% else %}
+        <p class="empty-state">No projects found.</p>
+    {% endif %}
+
+    <!-- Task Results -->
+    <h2>Tasks ({{ tasks|length }})</h2>
+    {% if tasks %}
+        {% for task in tasks %}
+        <div class="list-item">
+            <div>
+                <a href="{% url 'task_detail' pk=task.pk %}">
+                    <strong>{{ task.title }}</strong>
+                </a>
+                <span class="badge badge-{{ task.priority }}">{{ task.get_priority_display }}</span>
+                <span class="badge badge-status-{{ task.status }}">{{ task.get_status_display }}</span>
+            </div>
+            <span class="text-muted">in {{ task.project.name }}</span>
+        </div>
+        {% endfor %}
+    {% else %}
+        <p class="empty-state">No tasks found.</p>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}

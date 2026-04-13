@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ project.name }} - Task Manager{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <div>
+        <h1>{{ project.name }}</h1>
+        {% if project.description %}
+        <p class="text-muted">{{ project.description }}</p>
+        {% endif %}
+    </div>
+    <div class="header-actions">
+        <a href="{% url 'task_create' project_pk=project.pk %}" class="btn btn-primary">+ New Task</a>
+        <a href="{% url 'project_edit' pk=project.pk %}" class="btn btn-secondary">Edit Project</a>
+    </div>
+</div>
+
+<!-- Filter Bar -->
+<div class="filter-bar">
+    <span class="filter-label">Filter:</span>
+    <a href="{% url 'project_detail' pk=project.pk %}"
+       class="filter-btn {% if not status_filter and not priority_filter %}active{% endif %}">All</a>
+
+    <!-- Status filters -->
+    <a href="?status=todo" class="filter-btn {% if status_filter == 'todo' %}active{% endif %}">To Do</a>
+    <a href="?status=in_progress" class="filter-btn {% if status_filter == 'in_progress' %}active{% endif %}">In Progress</a>
+    <a href="?status=review" class="filter-btn {% if status_filter == 'review' %}active{% endif %}">Review</a>
+    <a href="?status=done" class="filter-btn {% if status_filter == 'done' %}active{% endif %}">Done</a>
+
+    <span class="filter-separator">|</span>
+
+    <!-- Priority filters -->
+    <a href="?priority=urgent" class="filter-btn {% if priority_filter == 'urgent' %}active{% endif %}">Urgent</a>
+    <a href="?priority=high" class="filter-btn {% if priority_filter == 'high' %}active{% endif %}">High</a>
+    <a href="?priority=medium" class="filter-btn {% if priority_filter == 'medium' %}active{% endif %}">Medium</a>
+    <a href="?priority=low" class="filter-btn {% if priority_filter == 'low' %}active{% endif %}">Low</a>
+</div>
+
+<!-- Task List -->
+{% if tasks %}
+<div class="task-list">
+    {% for task in tasks %}
+    <div class="task-card {% if task.is_overdue %}task-overdue{% endif %}">
+        <div class="task-header">
+            <a href="{% url 'task_detail' pk=task.pk %}">
+                <h3>{{ task.title }}</h3>
+            </a>
+            <div class="task-badges">
+                <span class="badge badge-{{ task.priority }}">{{ task.get_priority_display }}</span>
+                <span class="badge badge-status-{{ task.status }}">{{ task.get_status_display }}</span>
+            </div>
+        </div>
+        {% if task.description %}
+        <p class="text-muted">{{ task.description|truncatewords:15 }}</p>
+        {% endif %}
+        <div class="task-meta">
+            {% if task.assigned_to %}
+            <span>Assigned to: {{ task.assigned_to.username }}</span>
+            {% endif %}
+            {% if task.due_date %}
+            <span class="{% if task.is_overdue %}text-danger{% endif %}">
+                Due: {{ task.due_date|date:"M d, Y" }}
+            </span>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state-large">
+    <h2>No Tasks</h2>
+    <p>{% if status_filter or priority_filter %}No tasks match this filter.{% else %}Add your first task to this project!{% endif %}</p>
+    <a href="{% url 'task_create' project_pk=project.pk %}" class="btn btn-primary">Create Task</a>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,87 @@
+<!--
+=== LARAVEL COMPARISON ===
+This is like Laravel's resources/views/layouts/app.blade.php
+
+Django template syntax vs Blade:
+    Blade                          Django
+    -----                          ------
+    @extends('layouts.app')        {% extends 'base.html' %}
+    @section('content')            {% block content %}
+    @endsection                    {% endblock %}
+    @yield('content')              {% block content %}{% endblock %}
+    @include('partials.nav')       {% include 'partials/nav.html' %}
+    {{ $variable }}                {{ variable }}
+    @if($condition)                {% if condition %}
+    @foreach($items as $item)      {% for item in items %}
+    @csrf                          {% csrf_token %}
+    {{ route('name') }}            {% url 'name' %}
+    {{ asset('css/app.css') }}     {% static 'css/style.css' %}
+-->
+
+{% load static %}
+<!-- {% load static %} = Makes the {% static %} tag available (like asset() in Laravel) -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Task Manager{% endblock %}</title>
+    <!-- Like asset('css/style.css') in Laravel -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-brand">
+            <a href="{% url 'home' %}">TaskManager</a>
+            <!-- {% url 'home' %} = Like route('home') in Laravel -->
+        </div>
+
+        {% if user.is_authenticated %}
+        <!-- Like @auth in Blade -->
+        <div class="nav-links">
+            <a href="{% url 'dashboard' %}">Dashboard</a>
+            <a href="{% url 'project_list' %}">Projects</a>
+            <a href="{% url 'search' %}">Search</a>
+        </div>
+        <div class="nav-right">
+            <span class="nav-user">Hello, {{ user.username }}!</span>
+            <a href="{% url 'profile' %}">Profile</a>
+            <!-- Logout requires POST (CSRF protection) — like Laravel's logout form -->
+            <form method="post" action="{% url 'logout' %}" class="inline-form">
+                {% csrf_token %}
+                <!-- {% csrf_token %} = Like @csrf in Blade -->
+                <button type="submit" class="btn-link">Logout</button>
+            </form>
+        </div>
+        {% else %}
+        <!-- Like @guest in Blade -->
+        <div class="nav-right">
+            <a href="{% url 'login' %}">Login</a>
+            <a href="{% url 'register' %}">Register</a>
+        </div>
+        {% endif %}
+    </nav>
+
+    <!-- Flash Messages — Like @if(session('success')) in Blade -->
+    {% if messages %}
+    <div class="messages-container">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Main Content — Like @yield('content') in Blade -->
+    <main class="container">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer">
+        <p>Task Manager &mdash; Built with Django (Learning Project)</p>
+    </footer>
+</body>
+</html>

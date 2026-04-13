@@ -1,0 +1,99 @@
+<!--
+=== LARAVEL COMPARISON ===
+Like resources/views/dashboard.blade.php
+This shows an overview with stats, recent projects, and assigned tasks.
+-->
+
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Task Manager{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <h1>Dashboard</h1>
+    <a href="{% url 'project_create' %}" class="btn btn-primary">+ New Project</a>
+</div>
+
+<!-- Task Statistics Cards -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-number">{{ task_stats.total }}</div>
+        <div class="stat-label">Total Tasks</div>
+    </div>
+    <div class="stat-card stat-todo">
+        <div class="stat-number">{{ task_stats.todo }}</div>
+        <div class="stat-label">To Do</div>
+    </div>
+    <div class="stat-card stat-progress">
+        <div class="stat-number">{{ task_stats.in_progress }}</div>
+        <div class="stat-label">In Progress</div>
+    </div>
+    <div class="stat-card stat-done">
+        <div class="stat-number">{{ task_stats.done }}</div>
+        <div class="stat-label">Done</div>
+    </div>
+</div>
+
+<!-- Two-column layout -->
+<div class="dashboard-grid">
+    <!-- My Projects -->
+    <div class="card">
+        <div class="card-header">
+            <h2>My Projects</h2>
+            <a href="{% url 'project_list' %}" class="btn-link">View All</a>
+        </div>
+        <div class="card-body">
+            {% if projects %}
+                <!--
+                {% for %} = Like @foreach in Blade
+                {{ project.name }} = Like {{ $project->name }}
+                -->
+                {% for project in projects %}
+                <div class="list-item">
+                    <a href="{% url 'project_detail' pk=project.pk %}">
+                        <!-- {% url 'name' pk=value %} = Like route('name', ['pk' => $value]) -->
+                        <strong>{{ project.name }}</strong>
+                    </a>
+                    <span class="text-muted">{{ project.created_at|date:"M d, Y" }}</span>
+                    <!-- |date:"M d, Y" = Like ->format('M d, Y') or Carbon formatting -->
+                </div>
+                {% endfor %}
+            {% else %}
+                <!-- Like @empty in Blade -->
+                <p class="empty-state">No projects yet. Create your first project!</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- My Tasks -->
+    <div class="card">
+        <div class="card-header">
+            <h2>My Tasks</h2>
+        </div>
+        <div class="card-body">
+            {% if my_tasks %}
+                {% for task in my_tasks %}
+                <div class="list-item">
+                    <div>
+                        <a href="{% url 'task_detail' pk=task.pk %}">
+                            <strong>{{ task.title }}</strong>
+                        </a>
+                        <span class="badge badge-{{ task.priority }}">{{ task.get_priority_display }}</span>
+                        <!-- get_priority_display = Shows "High" instead of "high" -->
+                        <!-- Like an accessor that maps the value to its display label -->
+                        <span class="badge badge-status-{{ task.status }}">{{ task.get_status_display }}</span>
+                    </div>
+                    {% if task.due_date %}
+                    <span class="text-muted {% if task.is_overdue %}text-danger{% endif %}">
+                        Due: {{ task.due_date|date:"M d" }}
+                    </span>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            {% else %}
+                <p class="empty-state">No tasks assigned to you.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

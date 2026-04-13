@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block title %}Profile - Task Manager{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <h1>My Profile</h1>
+</div>
+
+<div class="profile-container">
+    <form method="post">
+        {% csrf_token %}
+
+        <h3>Account Information</h3>
+        {% for field in user_form %}
+        <div class="form-group">
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% if field.errors %}
+            <div class="field-error">{{ field.errors.0 }}</div>
+            {% endif %}
+        </div>
+        {% endfor %}
+
+        <h3>Profile Details</h3>
+        {% for field in profile_form %}
+        <div class="form-group">
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% if field.errors %}
+            <div class="field-error">{{ field.errors.0 }}</div>
+            {% endif %}
+        </div>
+        {% endfor %}
+
+        <button type="submit" class="btn btn-primary">Update Profile</button>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,52 @@
+<!--
+=== LARAVEL COMPARISON ===
+Like resources/views/auth/register.blade.php
+-->
+
+{% extends 'base.html' %}
+
+{% block title %}Register - Task Manager{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <h2>Create Account</h2>
+    <p class="auth-subtitle">Join Task Manager to start organizing your projects.</p>
+
+    <form method="post" action="{% url 'register' %}">
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+        <div class="alert alert-error">
+            {% for error in form.non_field_errors %}
+            <p>{{ error }}</p>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!--
+        Loop through form fields automatically.
+        Like doing @foreach($fields as $field) in Blade.
+        Each field object has: .label, .errors, .help_text
+        -->
+        {% for field in form %}
+        <div class="form-group">
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            <!-- field.help_text = Like the hint text under form fields -->
+            {% if field.help_text %}
+            <small class="help-text">{{ field.help_text }}</small>
+            {% endif %}
+            {% if field.errors %}
+            <div class="field-error">{{ field.errors.0 }}</div>
+            {% endif %}
+        </div>
+        {% endfor %}
+
+        <button type="submit" class="btn btn-primary btn-block">Register</button>
+    </form>
+
+    <p class="auth-footer">
+        Already have an account? <a href="{% url 'login' %}">Login here</a>
+    </p>
+</div>
+{% endblock %}
